@@ -4,7 +4,7 @@
 # 0.1 Libraries ---
 install.packages("pacman")
 library(pacman)
-p_load(tidyverse, janitor, readxl)
+p_load(tidyverse, janitor, readxl, tmap, nycflights13,leaflet, sp, sf,leaflet.extras)
 
 # 1.0 Data input ----
 demo_data <- read_excel("Projection démographiques 2017-2042 Inseed Comores.xlsx",
@@ -46,14 +46,41 @@ demo_datav5 <- demo_datav4 %>%
   select(4,2,1,3) %>%
   mutate(value = as.numeric(value))
 
+population <- demo_datav5 %>% filter(decoupage %in% c("Mwali","Ndzuwani","Ngazidja"),
+                                sex == "Total",
+                                annee == 2023) %>%
+  mutate (decoupage = case_when(
+    decoupage == "Mwali" ~ "Mohéli",
+    decoupage == "Ndzuwani" ~ "Anjouan",
+    decoupage == "Ngazidja" ~ "Grande Comore"
+  ))
+
+st_db <- comoros("island")
 
 
+population_stDB <- st_db %>% left_join(population, by = c("name"="decoupage"))
 
+tmap_mode("view") # in order to set tmap interactive
+try <- tm_shape(population_stDB) +
+  tm_polygons(col = "value")
 
+cities <- data.frame(
+  city = c("Moroni", "Moutsamoudou", "Fomboni"),
+  lng = c(43.25506, 44.39944, 43.7425),
+  lat = c(-11.70216, -12.16672, -12.28),
+  pop = c(1,5,6),
+  this = c("b","c","d")
 
+) %>%
+  mutate(lng = as.numeric(lng),
+         lat = as.numeric(lat))
 
-
-
+try_leflet <- tmap_leaflet(try) %>%
+  addMarkers(data = cities,
+             label = paste("Name: ", cities$city, "<br>",
+                           "Population: ", cities$pop, "<br>",
+                           "essaye: ", cities$this) %>%
+  lapply(htmltools::HTML))
 
 
 
