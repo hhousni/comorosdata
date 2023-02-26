@@ -2,7 +2,7 @@
 # This code aims to tidy the data from a messy MS excel spreadsheet
 
 # 0.1 Libraries ---
-install.packages("pacman")
+# install.packages("pacman")
 library(pacman)
 p_load(tidyverse, janitor, readxl, tmap, nycflights13,leaflet, sp, sf,leaflet.extras)
 
@@ -57,12 +57,13 @@ population <- demo_datav5 %>% filter(decoupage %in% c("Mwali","Ndzuwani","Ngazid
 
 st_db <- comoros("island")
 
-
 population_stDB <- st_db %>% left_join(population, by = c("name"="decoupage"))
 
 tmap_mode("view") # in order to set tmap interactive
 try <- tm_shape(population_stDB) +
   tm_polygons(col = "value")
+
+
 
 cities <- data.frame(
   city = c("Moroni", "Moutsamoudou", "Fomboni"),
@@ -77,10 +78,10 @@ cities <- data.frame(
 
 try_leflet <- tmap_leaflet(try) %>%
   addMarkers(data = cities,
-             label = paste("Name: ", cities$city, "<br>",
-                           "Population: ", cities$pop, "<br>",
+             label = paste(cities$city, "<br>",
+                           cities$pop, "habitants", "<br>",
                            "essaye: ", cities$this) %>%
   lapply(htmltools::HTML))
 
-
+try_leflet
 
